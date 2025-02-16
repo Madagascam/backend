@@ -4,11 +4,13 @@ version = "0.1.0"
 description = ""
 authors = ["den4ik2975 <den41k2975@yandex.ru>"]
 readme = "README.md"
+packages = [{include = "app"}]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
 fastapi = "^0.115.8"
-
+uvicorn = "^0.34.0"
 
 [build-system]
 requires = ["poetry-core"]
