@@ -11,6 +11,14 @@ package-mode = false
 python = "^3.12"
 fastapi = "^0.115.8"
 uvicorn = "^0.34.0"
+sqlmodel = "^0.0.23"
+sqlalchemy = "^2.0.38"
+pydantic = "^2.10.6"
+pydantic-settings = "^2.8.1"
+loguru = "^0.7.3"
+asyncpg = "^0.30.0"
+aiosqlite = "^0.21.0"
+pytest = "^8.3.4"
 
 [build-system]
 requires = ["poetry-core"]
