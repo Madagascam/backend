@@ -1,6 +1,5 @@
-# unit_of_work/abstract.py
 from abc import ABC, abstractmethod
-from typing import AsyncContextManager
+from typing import AsyncContextManager, Optional, Type, Any
 
 from crud import *
 
@@ -15,22 +14,23 @@ class AbstractUnitOfWork(AsyncContextManager, ABC):
 
     @abstractmethod
     async def __aenter__(self):
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        pass
+    async def __aexit__(self, exc_type: Optional[Type[BaseException]],
+                        exc_val: Optional[BaseException],
+                        exc_tb: Optional[Any]) -> Optional[bool]:
+        raise NotImplementedError
 
     @abstractmethod
     async def commit(self):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     async def rollback(self):
-        pass
+        raise NotImplementedError
 
 
-class SQLModelUnitOfWork(AbstractUnitOfWork):
+class SQLAlchemyUnitOfWork(AbstractUnitOfWork):
     def __init__(self, session_factory):
         self.session_factory = session_factory
 

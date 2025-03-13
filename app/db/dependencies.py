@@ -1,9 +1,9 @@
 from typing import AsyncGenerator
 
 from fastapi import Depends
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db import get_sql_sessionmaker, SQLModelUnitOfWork
+from app.db import get_sql_sessionmaker, SQLAlchemyUnitOfWork
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
@@ -17,11 +17,11 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 
 async def get_unit_of_work(
         session: AsyncSession = Depends(get_async_session)
-) -> AsyncGenerator[SQLModelUnitOfWork, None]:
+) -> AsyncGenerator[SQLAlchemyUnitOfWork, None]:
     # Create a session factory that will return our existing session
     def session_factory():
         return session
 
-    uow = SQLModelUnitOfWork(session_factory)
+    uow = SQLAlchemyUnitOfWork(session_factory)
     async with uow:
         yield uow
