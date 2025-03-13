@@ -44,9 +44,7 @@ class SQLAlchemyRepository(AbstractRepository[S], Generic[S]):
 
     async def create(self, obj: S) -> S:
         self.session.add(obj)
-
-        await self.session.commit()
-        await self.session.refresh(obj)
+        await self.session.flush()
 
         return obj
 
@@ -63,12 +61,10 @@ class SQLAlchemyRepository(AbstractRepository[S], Generic[S]):
 
     async def update(self, obj: S) -> S:
         self.session.add(obj)
-        await self.session.commit()
-        await self.session.refresh(obj)
+
         return obj
 
     async def delete(self, id: int) -> None:
-        obj = self.get(id)
+        obj = await self.get(id)
         if obj:
             await self.session.delete(obj)
-            await self.session.commit()
