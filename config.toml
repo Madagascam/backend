@@ -1,0 +1,5 @@
+[fastapi]
+origins = ["http://localhost:8000"]
+
+[database]
+connection_string = ""
