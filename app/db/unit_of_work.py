@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import AsyncContextManager, Optional, Type, Any
 
-from crud import *
+from sqlalchemy.ext.asyncio import async_sessionmaker
+
+from .crud import *
 
 
 class AbstractUnitOfWork(AsyncContextManager, ABC):
@@ -31,7 +33,7 @@ class AbstractUnitOfWork(AsyncContextManager, ABC):
 
 
 class SQLAlchemyUnitOfWork(AbstractUnitOfWork):
-    def __init__(self, session_factory):
+    def __init__(self, session_factory: async_sessionmaker):
         self.session_factory = session_factory
 
     async def __aenter__(self):
@@ -60,3 +62,4 @@ class SQLAlchemyUnitOfWork(AbstractUnitOfWork):
 
     async def rollback(self):
         await self.session.rollback()
+        self.session.expire_all()
