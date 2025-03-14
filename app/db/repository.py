@@ -1,36 +1,37 @@
 from abc import ABC, abstractmethod
 from typing import Generic, List, Optional, TypeVar, Type, Sequence
 
-from sqlmodel import select, SQLModel
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import DeclarativeBase
 
 T = TypeVar('T')
-S = TypeVar('S', bound=SQLModel)
+S = TypeVar('S', bound=DeclarativeBase)
 
 
 class AbstractRepository(Generic[T], ABC):
     @abstractmethod
     async def create(self, obj: T) -> T:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     async def get(self, id: int) -> Optional[T]:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     async def get_all(self, **filters) -> List[T]:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     async def update(self, obj: T) -> T:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     async def delete(self, id: int) -> None:
-        pass
+        raise NotImplementedError
 
 
-class SQLModelRepository(AbstractRepository[S], Generic[S]):
+class SQLAlchemyRepository(AbstractRepository[S], Generic[S]):
     def __init__(self, session: AsyncSession, model_class: Type[S]):
         self.session = session
         self.model_class = model_class
@@ -43,9 +44,7 @@ class SQLModelRepository(AbstractRepository[S], Generic[S]):
 
     async def create(self, obj: S) -> S:
         self.session.add(obj)
-
-        await self.session.commit()
-        await self.session.refresh(obj)
+        await self.session.flush()
 
         return obj
 
@@ -57,17 +56,15 @@ class SQLModelRepository(AbstractRepository[S], Generic[S]):
 
         statement = await self.apply_filters(statement, **filters)
 
-        result = await self.session.exec(statement)
-        return result.all()
+        result = await self.session.execute(statement)
+        return result.scalars().all()
 
     async def update(self, obj: S) -> S:
         self.session.add(obj)
-        await self.session.commit()
-        await self.session.refresh(obj)
+
         return obj
 
     async def delete(self, id: int) -> None:
-        obj = self.get(id)
+        obj = await self.get(id)
         if obj:
             await self.session.delete(obj)
-            await self.session.commit()

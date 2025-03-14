@@ -19,7 +19,6 @@ loguru = "^0.7.3"
 asyncpg = "^0.30.0"
 aiosqlite = "^0.21.0"
 pytest = "^8.3.4"
-g4f = "^0.4.8.6"
 
 [build-system]
 requires = ["poetry-core"]

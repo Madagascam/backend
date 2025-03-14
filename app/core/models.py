@@ -4,16 +4,21 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from sqlalchemy import Column, DateTime
-from sqlmodel import Field, Relationship, SQLModel
-from sqlalchemy.types import Enum as SQLModelEnum
+from sqlalchemy import ForeignKey, String, Text, Float, Integer
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.types import Enum as SQLAEnum
 
 
-class TimestampModel(SQLModel):
-    created_at: datetime = Field(default=datetime.now, nullable=False)
-    updated_at: datetime = Field(
-        default_factory=datetime.now,
-        sa_column_kwargs={"nullable": False, "default": datetime.now, "onupdate": datetime.now}
+class Base(DeclarativeBase):
+    pass
+
+
+class TimestampMixin:
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.now,
+        onupdate=datetime.now,
+        nullable=False
     )
 
 
@@ -23,100 +28,90 @@ class UserRole(str, Enum):
     ADMIN = "admin"
 
 
-class User(TimestampModel, table=True):
+class User(Base, TimestampMixin):
     __tablename__ = "users"
 
-    id: int | None = Field(primary_key=True, nullable=False, default=None)
-    username: str
-    password_hash: str
-    role: UserRole = Field(sa_column=Column(SQLModelEnum(UserRole)), default=UserRole.USER)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    username: Mapped[str] = mapped_column(String(255))
+    password_hash: Mapped[str] = mapped_column(String(255))
+    role: Mapped[UserRole] = mapped_column(SQLAEnum(UserRole), default=UserRole.USER)
 
-    # One-to-many relationship with games
-    games: List["Game"] = Relationship(back_populates="user")
-
-    # One-to-many relationship with tasks
-    tasks: List["Task"] = Relationship(back_populates="user")
+    # Relationships
+    games: Mapped[List["Game"]] = relationship(back_populates="user")
+    tasks: Mapped[List["Task"]] = relationship(back_populates="user")
 
 
-class Game(TimestampModel, table=True):
+class Game(Base, TimestampMixin):
     __tablename__ = "games"
 
-    id: int | None = Field(primary_key=True, nullable=False, default=None)
-    title: str
-    event: str | None = None
-    date: datetime
-    white_player: str
-    black_player: str
-    pgn_data: str
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    title: Mapped[str] = mapped_column(String(255))
+    event: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    date: Mapped[datetime] = mapped_column()
+    white_player: Mapped[str] = mapped_column(String(255))
+    black_player: Mapped[str] = mapped_column(String(255))
+    pgn_data: Mapped[str] = mapped_column(Text)
 
-    # Many-to-one relationship with user
-    user_id: int | None = Field(default=None, foreign_key="users.id")
-    user: "User" | None = Relationship(back_populates="games")
+    # Relationships
+    user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True)
+    user: Mapped[Optional["User"]] = relationship(back_populates="games")
 
-    # One-to-many relationship with highlights
-    highlights: List["Highlight"] = Relationship(back_populates="game")
-
-    # One-to-one relationship with video
-    video: "Video" | None = Relationship(back_populates="game", sa_relationship_kwargs={"uselist": False})
-
-    # One-to-many relationship with tasks
-    tasks: List["Task"] = Relationship(back_populates="game")
+    highlights: Mapped[List["Highlight"]] = relationship(back_populates="game")
+    video: Mapped[Optional["Video"]] = relationship(back_populates="game", uselist=False)
+    tasks: Mapped[List["Task"]] = relationship(back_populates="game")
 
 
-class Highlight(TimestampModel, table=True):
+class Highlight(Base, TimestampMixin):
     __tablename__ = "highlights"
 
-    id: int | None = Field(primary_key=True, nullable=False, default=None)
-    category: str
-    start_move: int  # From pgn notation
-    end_move: int  # From pgn notation
-    importance_score: float
-    position_before: str  # FEN notation (maybe will be removed)
-    position_after: str  # FEN notation
-    description: str
-    detected_by: str
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    category: Mapped[str] = mapped_column(String(255))
+    start_move: Mapped[int] = mapped_column(Integer)  # From pgn notation
+    end_move: Mapped[int] = mapped_column(Integer)  # From pgn notation
+    importance_score: Mapped[float] = mapped_column(Float)
+    position_before: Mapped[str] = mapped_column(String(255))  # FEN notation (maybe will be removed)
+    position_after: Mapped[str] = mapped_column(String(255))  # FEN notation
+    description: Mapped[str] = mapped_column(Text)
+    detected_by: Mapped[str] = mapped_column(String(255))
 
-    # Many-to-one relationship with game
-    game_id: int | None = Field(default=None, foreign_key="games.id")
-    game: "Game" | None = Relationship(back_populates="highlights")
+    # Relationships
+    game_id: Mapped[Optional[int]] = mapped_column(ForeignKey("games.id"), nullable=True)
+    game: Mapped[Optional["Game"]] = relationship(back_populates="highlights")
 
-    # One-to-one relationship with video segment
-    video_segment: "VideoSegment" | None = Relationship(
-        sa_relationship_kwargs={"uselist": False, "back_populates": "highlight"}
-    )
+    video_segment: Mapped[Optional["VideoSegment"]] = relationship(back_populates="highlight", uselist=False)
 
 
-class Video(TimestampModel, table=True):
+class Video(Base, TimestampMixin):
     __tablename__ = "videos"
 
-    id: int | None = Field(primary_key=True, nullable=False, default=None)
-    original_video_url: str
-    processed_video_url: str
-    status: str
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    original_video_url: Mapped[str] = mapped_column(String(255))
+    processed_video_url: Mapped[str] = mapped_column(String(255))
+    status: Mapped[str] = mapped_column(String(50))
 
-    # One-to-one relationship with game
-    game_id: int | None = Field(default=None, foreign_key="games.id", unique=True)
-    game: "Game" | None = Relationship(back_populates="video")
+    # Relationships with unique constraint for one-to-one
+    game_id: Mapped[Optional[int]] = mapped_column(ForeignKey("games.id"), unique=True, nullable=True)
+    game: Mapped[Optional["Game"]] = relationship(back_populates="video")
 
-    # One-to-many relationship with video segments
-    segments: List["VideoSegment"] = Relationship(back_populates="video")
+    segments: Mapped[List["VideoSegment"]] = relationship(back_populates="video")
 
 
-class VideoSegment(TimestampModel, table=True):
+class VideoSegment(Base, TimestampMixin):
     __tablename__ = "video_segments"
 
-    id: int | None = Field(primary_key=True, nullable=False, default=None)
-    start_time: int
-    end_time: int
-    sequence_order: int
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    start_time: Mapped[int] = mapped_column(Integer)
+    end_time: Mapped[int] = mapped_column(Integer)
+    sequence_order: Mapped[int] = mapped_column(Integer)
 
-    # Many-to-one relationship with video
-    video_id: int | None = Field(default=None, foreign_key="videos.id")
-    video: "Video" | None = Relationship(back_populates="segments")
+    # Relationships
+    video_id: Mapped[Optional[int]] = mapped_column(ForeignKey("videos.id"), nullable=True)
+    video: Mapped[Optional["Video"]] = relationship(back_populates="segments")
 
-    # One-to-one relationship with highlight
-    highlight_id: int | None = Field(default=None, foreign_key="highlights.id", unique=True)
-    highlight: "Highlight" | None = Relationship(back_populates="video_segment")
+    # One-to-one relationship with highlight (using unique constraint)
+    highlight_id: Mapped[Optional[int]] = mapped_column(ForeignKey("highlights.id"), unique=True, nullable=True)
+    highlight: Mapped[Optional["Highlight"]] = relationship(back_populates="video_segment")
+
 
 class TaskType(str, Enum):
     GAME_ANALYSIS = "game_analysis"
@@ -124,29 +119,29 @@ class TaskType(str, Enum):
     HIGHLIGHT_DETECTION = "highlight_detection"
     VIDEO_EFFECTS = "video_effects"
 
+
 class TaskStatus(str, Enum):
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
     FAILED = "failed"
 
-class Task(TimestampModel, table=True):
+
+class Task(Base, TimestampMixin):
     __tablename__ = "tasks"
 
-    id: Optional[int] = Field(primary_key=True, nullable=False, default=None)
-    type: TaskType = Field(sa_column=Column(SQLModelEnum(TaskType)))
-    status: TaskStatus = Field(sa_column=Column(SQLModelEnum(TaskStatus)), default=TaskStatus.PENDING)
-    error_message: Optional[str] = None
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    type: Mapped[TaskType] = mapped_column(SQLAEnum(TaskType))
+    status: Mapped[TaskStatus] = mapped_column(SQLAEnum(TaskStatus), default=TaskStatus.PENDING)
+    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    # Every task belongs to a game (central entity)
-    game_id: int = Field(foreign_key="games.id")
-    game: Game = Relationship(back_populates="tasks")
+    # Relationships
+    game_id: Mapped[int] = mapped_column(ForeignKey("games.id"))
+    game: Mapped["Game"] = relationship(back_populates="tasks")
 
-    # Every task has a user assigned
-    user_id: int = Field(foreign_key="users.id")
-    user: User = Relationship(back_populates="tasks")
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user: Mapped["User"] = relationship(back_populates="tasks")
 
-    # Optional links to specific objects
-    # video_id: Optional[int] = Field(default=None, foreign_key="videos.id")
-    # highlight_id: Optional[int] = Field(default=None, foreign_key="highlights.id")
-
+    # Optional commented fields from the original model
+    # video_id: Mapped[Optional[int]] = mapped_column(ForeignKey("videos.id"), nullable=True)
+    # highlight_id: Mapped[Optional[int]] = mapped_column(ForeignKey("highlights.id"), nullable=True)
