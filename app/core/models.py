@@ -145,3 +145,18 @@ class Task(Base, TimestampMixin):
     # Optional commented fields from the original model
     # video_id: Mapped[Optional[int]] = mapped_column(ForeignKey("videos.id"), nullable=True)
     # highlight_id: Mapped[Optional[int]] = mapped_column(ForeignKey("highlights.id"), nullable=True)
+
+
+class LogType(int, Enum):
+    system = 0
+    exceptions = 1
+    user = 2
+
+
+class Log(Base, TimestampMixin):
+    __tablename__ = 'logs'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    log_type: Mapped[LogType] = mapped_column(SQLAEnum(LogType))
+    text: Mapped[str]
