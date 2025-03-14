@@ -19,6 +19,8 @@ asyncpg = "^0.30.0"
 aiosqlite = "^0.21.0"
 pytest = "^8.3.4"
 pytest-asyncio = "^0.25.3"
+python-multipart = "^0.0.20"
+python-chess = "^1.999"
 
 [build-system]
 requires = ["poetry-core"]
