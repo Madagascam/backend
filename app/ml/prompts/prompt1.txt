@@ -1,0 +1,3 @@
+Highlight the most interesting segment of moves on pgn of a chess game (no more than 10 moves)
+Need to output only the following list [start number of interesting move, end number of interesting code]
+PGN:
