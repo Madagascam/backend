@@ -21,6 +21,7 @@ pytest = "^8.3.4"
 pytest-asyncio = "^0.25.3"
 python-multipart = "^0.0.20"
 python-chess = "^1.999"
+g4f = "^0.4.8.6"
 
 [build-system]
 requires = ["poetry-core"]
