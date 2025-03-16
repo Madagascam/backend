@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
 
@@ -61,3 +61,8 @@ class HighlightResponseSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class GameWithHighlightsResponseSchema(BaseModel):
+    game: GameResponseSchema
+    highlights: List[HighlightResponseSchema]
