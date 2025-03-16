@@ -41,6 +41,9 @@ class UserResponseSchema(BaseModel):
     username: str
     role: UserRole
 
+    class Config:
+        from_attributes = True
+
 
 class GameCreateSchema(BaseModel):
     title: str
@@ -62,7 +65,7 @@ class GameResponseSchema(BaseModel):
 
 
 class AnalysisResponseSchema(BaseModel):
-    task_id: int
+    id: int
     status: str
 
     class Config:
@@ -83,3 +86,9 @@ class HighlightResponseSchema(BaseModel):
 class GameWithHighlightsResponseSchema(BaseModel):
     game: GameResponseSchema
     highlights: List[HighlightResponseSchema]
+
+
+class VideoSegmentResponseSchema(BaseModel):
+    id: int
+    start_move: int
+    end_move: int

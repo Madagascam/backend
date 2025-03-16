@@ -52,7 +52,7 @@ async def get_analysis_status(
         current_user: Annotated[User, Depends(get_current_user)]
 ):
     task = await uow.task.get_by_game_id(game_id)
-    return task
+    return task[-1]
 
 
 @router.get("/result",

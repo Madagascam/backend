@@ -10,7 +10,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 async def get_uow(session_factory=Depends(get_sql_sessionmaker)):
     async with SQLAlchemyUnitOfWork(session_factory) as uow:
-        return uow
+        yield uow
 
 
 async def get_current_user(

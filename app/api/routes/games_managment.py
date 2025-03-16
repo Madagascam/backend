@@ -91,9 +91,9 @@ async def delete_game(
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
         current_user: Annotated[User, Depends(get_current_user)]
 ):
-    game = await uow.game.get_all(id=game_id, user_id=current_user.id)
+    game = await uow.game.get(game_id)
     if not game:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
 
-    await uow.game.delete(game[0].id)
+    await uow.game.delete(game)
     await uow.commit()

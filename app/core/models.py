@@ -5,11 +5,12 @@ from enum import Enum
 from typing import List, Optional
 
 from sqlalchemy import ForeignKey, String, Text, Integer
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLAEnum
 
 
-class Base(DeclarativeBase):
+class Base(DeclarativeBase, AsyncAttrs):
     pass
 
 
@@ -58,7 +59,7 @@ class Game(Base, TimestampMixin):
 
     highlights: Mapped[List["Highlight"]] = relationship(back_populates="game")
     video: Mapped[Optional["Video"]] = relationship(back_populates="game", uselist=False)
-    tasks: Mapped[List["Task"]] = relationship(back_populates="game")
+    tasks: Mapped[List["Task"]] = relationship(back_populates="game", cascade="all, delete-orphan")
 
 
 class Highlight(Base, TimestampMixin):
@@ -68,7 +69,7 @@ class Highlight(Base, TimestampMixin):
     start_move: Mapped[int] = mapped_column(Integer)  # From pgn notation
     end_move: Mapped[int] = mapped_column(Integer)  # From pgn notation
     description: Mapped[str] = mapped_column(Text)
-    detected_by: Mapped[str] = mapped_column(String(255))
+    detected_by: Mapped[str] = mapped_column(String(255), default="AI")
 
     # Relationships
     game_id: Mapped[Optional[int]] = mapped_column(ForeignKey("games.id"), nullable=True)

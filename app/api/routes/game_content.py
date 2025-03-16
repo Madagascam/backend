@@ -3,8 +3,9 @@ from typing import Annotated, List
 
 from fastapi import Depends, APIRouter, UploadFile, File, HTTPException, Path, status
 
-from app import User, Video, Highlight, VideoSegment
+from app import User, Video
 from app.api.dependencies import get_current_user, get_uow
+from app.core.DTO import HighlightResponseSchema, VideoSegmentResponseSchema
 from app.db import SQLAlchemyUnitOfWork
 
 router = APIRouter(tags=["game_content"], prefix="/games")
@@ -43,7 +44,7 @@ async def upload_game_video(
 
 @router.get("/{game_id}/highlights",
             status_code=status.HTTP_200_OK,
-            response_model=List[Highlight])
+            response_model=List[HighlightResponseSchema])
 async def get_highlights(
         game_id: Annotated[int, Path()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
@@ -60,7 +61,7 @@ async def get_highlights(
 
 @router.get("/{game_id}/video-segments",
             status_code=status.HTTP_200_OK,
-            response_model=List[VideoSegment])
+            response_model=List[VideoSegmentResponseSchema])
 async def get_video_segments(
         game_id: Annotated[int, Path()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
@@ -71,5 +72,11 @@ async def get_video_segments(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
 
     game = game[0]
+    result = []
 
-    return [highlight.video_segment for highlight in game.highlights]
+    for highlight in game.highlights:
+        video_segment = await highlight.awaitable_attrs.video_segment
+        if video_segment is not None:
+            result.append(video_segment)
+
+    return result

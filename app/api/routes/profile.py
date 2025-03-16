@@ -19,7 +19,8 @@ router = APIRouter(
 async def get_profile(
         current_user: Annotated[User, Depends(get_current_user)]
 ):
-    return UserUpdateSchema.model_validate(current_user)
+    current_user
+    return UserResponseSchema.model_validate(current_user)
 
 
 @router.patch("/",
