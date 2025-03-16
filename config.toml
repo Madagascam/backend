@@ -3,3 +3,8 @@ origins = ["http://localhost:8000"]
 
 [database]
 connection_string = ""
+
+[security]
+secret_key = "MLCsj1o93AplneNtQP1FXcqtbBqWLr8EXi8eG1OfNio="
+algorithm = "HS256"
+access_token_expire_minutes = 30

@@ -3,8 +3,8 @@ from datetime import timedelta
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 
+from app.config import settings
 from app.core.DTO import *
-from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
