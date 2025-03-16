@@ -48,8 +48,8 @@ class SQLAlchemyRepository(AbstractRepository[S], Generic[S]):
 
         return obj
 
-    async def get(self, id: int) -> Optional[S]:
-        return await self.session.get(self.model_class, id)
+    async def get(self, obj_id: int) -> Optional[S]:
+        return await self.session.get(self.model_class, obj_id)
 
     async def get_all(self, **filters) -> Sequence[S]:
         statement = select(self.model_class)
@@ -64,7 +64,9 @@ class SQLAlchemyRepository(AbstractRepository[S], Generic[S]):
 
         return obj
 
-    async def delete(self, id: int) -> None:
-        obj = await self.get(id)
+    async def delete(self, obj: int | S) -> None:
+        if isinstance(obj, int):
+            obj = await self.get(obj)
+
         if obj:
             await self.session.delete(obj)

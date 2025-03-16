@@ -17,7 +17,7 @@ async def async_get_sql_sessionmaker(database_string: str = "sqlite+aiosqlite://
     return session_maker
 
 
-def get_sql_sessionmaker(database_string: str = "sqlite+aiosqlite:///:memory:") -> async_sessionmaker:
+def get_sql_sessionmaker(database_string: str = "sqlite+aiosqlite:///test.db") -> async_sessionmaker:
     engine = create_async_engine(database_string)
     asyncio.run(initialize_database(engine))
     session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
