@@ -3,6 +3,8 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 
+from app import UserRole
+
 
 class TokenSchema(BaseModel):
     access_token: str
@@ -23,6 +25,21 @@ class UserCreateSchema(BaseModel):
 class UserLoginSchema(BaseModel):
     username: str
     password: str
+
+
+class UserUpdateSchema(BaseModel):
+    username: Optional[str] = None
+    password: Optional[str] = None
+    role: Optional[UserRole] = None
+
+    class Config:
+        from_attributes = True
+
+
+class UserResponseSchema(BaseModel):
+    id: int
+    username: str
+    role: UserRole
 
 
 class GameCreateSchema(BaseModel):
