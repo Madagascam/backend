@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from sqlalchemy import ForeignKey, String, Text, Float, Integer
+from sqlalchemy import ForeignKey, String, Text, Integer
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLAEnum
 
@@ -65,12 +65,8 @@ class Highlight(Base, TimestampMixin):
     __tablename__ = "highlights"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    category: Mapped[str] = mapped_column(String(255))
     start_move: Mapped[int] = mapped_column(Integer)  # From pgn notation
     end_move: Mapped[int] = mapped_column(Integer)  # From pgn notation
-    importance_score: Mapped[float] = mapped_column(Float)
-    position_before: Mapped[str] = mapped_column(String(255))  # FEN notation (maybe will be removed)
-    position_after: Mapped[str] = mapped_column(String(255))  # FEN notation
     description: Mapped[str] = mapped_column(Text)
     detected_by: Mapped[str] = mapped_column(String(255))
 
