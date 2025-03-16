@@ -16,9 +16,16 @@ class FastAPISettings(BaseSettings):
 class DatabaseSettings(BaseModel):
     connection_string: str
 
+
+class SecuritySettings(BaseModel):
+    secret_key: str
+    algorithm: str
+    access_token_expire_minutes: int
+
 class Settings(BaseSettings):
     fastapi: FastAPISettings
     database: DatabaseSettings
+    security: SecuritySettings
 
     model_config = SettingsConfigDict(toml_file='../config.toml')
 

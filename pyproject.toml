@@ -19,6 +19,10 @@ loguru = "^0.7.3"
 asyncpg = "^0.30.0"
 aiosqlite = "^0.21.0"
 pytest = "^8.3.4"
+passlib = { extras = ["bcrypt"], version = "^1.7.4" }
+python-jose = { extras = ["cryptography"], version = "^3.4.0" }
+httpx = "^0.28.1"
+bcrypt = "4.0.1"
 
 [build-system]
 requires = ["poetry-core"]
