@@ -8,10 +8,10 @@ from app.core.DTO import AnalysisResponseSchema, HighlightResponseSchema
 from app.db import SQLAlchemyUnitOfWork
 from app.utils.helpers import run_analysis
 
-router = APIRouter(tags=["analysis"])
+router = APIRouter(tags=["analysis"], prefix="/games/{game_id}/analysis")
 
 
-@router.post("/games/{game_id}/analysis",
+@router.post("/",
              response_model=AnalysisResponseSchema,
              status_code=status.HTTP_202_ACCEPTED)
 async def start_game_analysis(
@@ -44,7 +44,7 @@ async def start_game_analysis(
     return analysis_task
 
 
-@router.get("/games/{game_id}/analysis/status",
+@router.get("/status",
             response_model=AnalysisResponseSchema)
 async def get_analysis_status(
         game_id: Annotated[int, Path()],
@@ -55,7 +55,7 @@ async def get_analysis_status(
     return task
 
 
-@router.get("/games/{game_id}/analysis/result",
+@router.get("/result",
             response_model=List[HighlightResponseSchema])
 async def get_analysis_result(
         game_id: Annotated[int, Path()],

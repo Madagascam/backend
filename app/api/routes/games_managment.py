@@ -11,10 +11,10 @@ from app.core.DTO import GameResponseSchema, HighlightResponseSchema, \
     GameWithHighlightsResponseSchema
 from app.db import SQLAlchemyUnitOfWork
 
-router = APIRouter(tags=["games_managment"])
+router = APIRouter(tags=["games_managment"], prefix="/games")
 
 
-@router.post("/games",
+@router.post("/",
              response_model=GameResponseSchema,
              status_code=status.HTTP_201_CREATED)
 async def create_game_with_pgn(
@@ -55,7 +55,7 @@ async def create_game_with_pgn(
     return game
 
 
-@router.get("/games",
+@router.get("/",
             response_model=List[GameResponseSchema],
             status_code=status.HTTP_200_OK)
 async def list_games(
@@ -65,7 +65,7 @@ async def list_games(
     return await uow.game.get_all(user_id=current_user.id)
 
 
-@router.get("/games/{game_id}",
+@router.get("/{game_id}",
             response_model=GameWithHighlightsResponseSchema,
             status_code=status.HTTP_200_OK)
 async def get_game(
@@ -85,7 +85,7 @@ async def get_game(
     )
 
 
-@router.delete("/games/{game_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{game_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_game(
         game_id: Annotated[int, Path()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],

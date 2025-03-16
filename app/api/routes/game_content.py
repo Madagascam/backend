@@ -7,10 +7,10 @@ from app import User, Video, Highlight, VideoSegment
 from app.api.dependencies import get_current_user, get_uow
 from app.db import SQLAlchemyUnitOfWork
 
-router = APIRouter(tags=["game_content"])
+router = APIRouter(tags=["game_content"], prefix="/games")
 
 
-@router.post("/games/{game_id}/video",
+@router.post("/{game_id}/video",
              status_code=status.HTTP_201_CREATED)
 async def upload_game_video(
         game_id: Annotated[int, Path()],
@@ -41,7 +41,7 @@ async def upload_game_video(
     return {"message": "Video uploaded successfully", "video_id": video.id}
 
 
-@router.get("/games/{game_id}/highlights",
+@router.get("/{game_id}/highlights",
             status_code=status.HTTP_200_OK,
             response_model=List[Highlight])
 async def get_highlights(
@@ -58,7 +58,7 @@ async def get_highlights(
     return game.highlights
 
 
-@router.get("/games/{game_id}/video-segments",
+@router.get("/{game_id}/video-segments",
             status_code=status.HTTP_200_OK,
             response_model=List[VideoSegment])
 async def get_video_segments(
