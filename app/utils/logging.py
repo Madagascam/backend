@@ -7,7 +7,7 @@ def setup_logging():
     logger.remove()
     logger.add(
         sys.stdout,
-        format="[{time:YYYY-MM-DD HH:mm:ss}|<b><level>{extra[user_id]:>12}</level></b>] {message}",
+        format="[{time:YYYY-MM-DD HH:mm:ss}] {message}",
         backtrace=True,
         diagnose=True,
         colorize=True,

@@ -25,6 +25,7 @@ class SecuritySettings(BaseModel):
 
 class AnalysisSettings(BaseModel):
     default_strategy: str
+    engine_path: str
 
 class Settings(BaseSettings):
     fastapi: FastAPISettings

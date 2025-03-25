@@ -5,8 +5,8 @@ import chess.engine
 import chess.pgn
 from chess import KING, ROOK, QUEEN, PAWN
 
-import util
-from safe1 import get_all_positions
+from . import util
+from .safe1 import get_all_positions
 
 
 def fork(board: chess.Board, move: chess.Move, turn_color):

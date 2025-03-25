@@ -3,14 +3,17 @@ from typing import List, Tuple
 from app.analysis import AbstractAnalysisStrategy
 from .heuristic_functions import find_moments_without_stockfish, stockfish_moments
 from .util import merge_intervals, transform_format
+from ...config import settings
 
 
 class AnalyticsStrategy(AbstractAnalysisStrategy):
 
     async def analyze(self, pgn_data: str,
-                      engine_path: str = "Cock"
+                      engine_path: str = settings.analysis.engine_path
                       ) -> List[Tuple[str, str]]:
+        print(pgn_data)
         heuristics_without_stockfish = find_moments_without_stockfish(pgn_data)
+        print(heuristics_without_stockfish)
         stockfish_moves = stockfish_moments(pgn_data, engine_path)
         heuristics = heuristics_without_stockfish + stockfish_moves
         heuristics = merge_intervals(heuristics)
