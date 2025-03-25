@@ -1,9 +1,8 @@
 from typing import List, Tuple
 
-from .abstract_strategy import AbstractAnalysisStrategy
+from app.analysis import AbstractAnalysisStrategy
 
 
-class StockfishStrategy(AbstractAnalysisStrategy):
-
+class ProjectAIStrategy(AbstractAnalysisStrategy):
     async def analyze(self, pgn_data: str) -> List[Tuple[str, str]]:
         pass

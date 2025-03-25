@@ -2,7 +2,7 @@ import json
 
 from g4f import ChatCompletion, Provider
 
-from .abstract_strategy import AbstractAnalysisStrategy
+from app.analysis import AbstractAnalysisStrategy
 
 
 class ThirdPartyAIStrategy(AbstractAnalysisStrategy):

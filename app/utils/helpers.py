@@ -1,7 +1,7 @@
 from loguru import logger
 
 from app import TaskStatus, Highlight
-from app.analysis import ChessAnalysisInterface
+from app.core import ChessAnalysisInterface
 from app.db import get_sql_sessionmaker, SQLAlchemyUnitOfWork
 
 
