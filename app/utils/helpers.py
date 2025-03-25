@@ -12,7 +12,7 @@ async def run_analysis(game_id: int, task_id: int):
             # game = await uow.game.get(game_id)
             # result = await analyze_game(game.pgn_data)
 
-            results = [[10, 15, "WOW horse dies"], [18, 20, "РокировОчка"]]
+            results = [["10W", "15B", "WOW horse dies"], [18, 20, "РокировОчка"]]
 
             for result in results:
                 highlight = Highlight(

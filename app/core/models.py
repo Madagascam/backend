@@ -66,8 +66,8 @@ class Highlight(Base, TimestampMixin):
     __tablename__ = "highlights"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    start_move: Mapped[int] = mapped_column(Integer)  # From pgn notation
-    end_move: Mapped[int] = mapped_column(Integer)  # From pgn notation
+    start_move: Mapped[str] = mapped_column(String(5))
+    end_move: Mapped[str] = mapped_column(String(5))
     description: Mapped[str] = mapped_column(Text)
     detected_by: Mapped[str] = mapped_column(String(255), default="AI")
 
