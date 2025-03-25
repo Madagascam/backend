@@ -1,6 +1,7 @@
 from enum import Enum
-from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, Tuple
+
+from loguru import logger
 
 from app.config import settings
 from .strategies import *
@@ -25,10 +26,14 @@ class ChessAnalyzer:
     def strategy(self, strategy: AbstractAnalysisStrategy) -> None:
         self._strategy = strategy
 
-    async def analyze_game(self, game_data: str) -> List[str]:
+    async def analyze_game(self, game_data: str) -> List[Tuple[str, str]]:
         if self._strategy is None:
             raise ValueError("Analysis strategy not set")
-        return await self._strategy.analyze(game_data)
+
+        result = await self._strategy.analyze(game_data)
+        logger.info(f"Analysis completed. Result: {result}")
+
+        return result
 
 
 class ChessAnalysisInterface:
@@ -51,8 +56,11 @@ class ChessAnalysisInterface:
         self.current_strategy = strategy_name
         self.analyzer.strategy = self.available_strategies[strategy_name]
 
-    async def analyze_game(self, game_data: str) -> list[str]:
+    async def analyze_game(self, game_data: str) -> List[Tuple[str, str]]:
         if self.current_strategy is None:
+            self.current_strategy = self.default_strategy
             self.set_strategy(self.default_strategy)
+
+        logger.info(f"Starting analysis. Using strategy: {self.current_strategy}")
 
         return await self.analyzer.analyze_game(game_data)
