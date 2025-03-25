@@ -8,24 +8,25 @@ from app.core.DTO import UserUpdateSchema, UserResponseSchema
 from app.db import SQLAlchemyUnitOfWork
 
 router = APIRouter(
-    prefix="/profile",
-    tags=["profile"]
+    prefix="/api/profile",
+    tags=["Profile"]
 )
 
 
 @router.get("/",
             response_model=UserResponseSchema,
-            status_code=status.HTTP_200_OK)
+            status_code=status.HTTP_200_OK,
+            summary="Get user profile")
 async def get_profile(
         current_user: Annotated[User, Depends(get_current_user)]
 ):
-    current_user
     return UserResponseSchema.model_validate(current_user)
 
 
 @router.patch("/",
               response_model=UserResponseSchema,
-              status_code=status.HTTP_200_OK)
+              status_code=status.HTTP_200_OK,
+              summary="Update user profile")
 async def update_profile(
         update_data: Annotated[UserUpdateSchema, Body()],
         current_user: Annotated[User, Depends(get_current_user)],

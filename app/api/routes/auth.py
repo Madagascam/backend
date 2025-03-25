@@ -4,15 +4,19 @@ from fastapi import APIRouter, Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app import User
-from app.core.DTO import UserCreateSchema, TokenSchema
+from app.core.DTO import UserCreateSchema, TokenSchema, UserResponseSchema
 from app.db import SQLAlchemyUnitOfWork
 from app.utils import verify_password, create_access_token, get_password_hash
 from ..dependencies import get_uow
 
-router = APIRouter(tags=["authentication"])
+router = APIRouter(tags=["Authentication"])
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+@router.post("/api/register",
+             response_model=UserResponseSchema,
+             status_code=status.HTTP_201_CREATED,
+             summary="Register with username and password",
+             description="Base Oauth2 password flow")
 async def register(
         user_data: Annotated[UserCreateSchema, Body()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)]
@@ -35,14 +39,12 @@ async def register(
     await uow.commit()
 
     # Return user info (without password)
-    return {
-        "id": user.id,
-        "username": user.username,
-        "role": user.role
-    }
+    return UserResponseSchema.model_validate(user)
 
 
-@router.post("/token", response_model=TokenSchema)
+@router.post("/api/token",
+             response_model=TokenSchema,
+             summary="Login for access token")
 async def login_for_access_token(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)]
