@@ -1,9 +1,13 @@
+from loguru import logger
+
 from app import TaskStatus, Highlight
+from app.analysis import ChessAnalysisInterface
 from app.db import get_sql_sessionmaker, SQLAlchemyUnitOfWork
-from app.ml import ChessAnalysisInterface
 
 
 async def run_analysis(game_id: int, task_id: int):
+    logger.info(f"Running analysis for game with id: {game_id}")
+
     async with SQLAlchemyUnitOfWork(get_sql_sessionmaker()) as uow:
         try:
             task = await uow.task.get(task_id)
@@ -25,6 +29,7 @@ async def run_analysis(game_id: int, task_id: int):
                 await uow.highlight.create(highlight)
 
             task.status = TaskStatus.COMPLETED
+            logger.info(f"Analysis completed for game with id: {game_id}")
             await uow.commit()
 
         except Exception as e:

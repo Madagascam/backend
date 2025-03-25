@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends, APIRouter, BackgroundTasks, HTTPException, Path, status
+from loguru import logger
 
 from app import User, Task, TaskType, TaskStatus
 from app.api.dependencies import get_current_user, get_uow
@@ -41,6 +42,7 @@ async def start_game_analysis(
     await uow.commit()
 
     background_tasks.add_task(run_analysis, game_id, analysis_task.id)
+    logger.info(f"Added analysis task with id: {analysis_task.id} for game with id: {game_id}")
 
     return analysis_task
 
@@ -54,6 +56,7 @@ async def get_analysis_status(
         current_user: Annotated[User, Depends(get_current_user)]
 ):
     task = await uow.task.get_by_game_id(game_id)
+    logger.info(f"Got analysis task with id: {task[-1].id} for game with id: {game_id}")
     return task[-1]
 
 
@@ -70,6 +73,8 @@ async def get_analysis_result(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
 
     game = game[0]
+
+    logger.info(f"Got analysis results for game with id: {game_id}")
 
     return AnalysisResultResponseSchema(pgn_data=game.pgn_data,
                                         highlights=[HighlightResponseSchema.model_validate(hi) for hi in
