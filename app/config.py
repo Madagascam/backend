@@ -22,10 +22,15 @@ class SecuritySettings(BaseModel):
     algorithm: str
     access_token_expire_minutes: int
 
+
+class AnalysisSettings(BaseModel):
+    default_strategy: str
+
 class Settings(BaseSettings):
     fastapi: FastAPISettings
     database: DatabaseSettings
     security: SecuritySettings
+    analysis: AnalysisSettings
 
     model_config = SettingsConfigDict(toml_file='../config.toml')
 

@@ -8,11 +8,12 @@ from app.api.dependencies import get_current_user, get_uow
 from app.core.DTO import HighlightResponseSchema, VideoSegmentResponseSchema
 from app.db import SQLAlchemyUnitOfWork
 
-router = APIRouter(tags=["game_content"], prefix="/games")
+router = APIRouter(tags=["Game content"], prefix="/api/games")
 
 
 @router.post("/{game_id}/video",
-             status_code=status.HTTP_201_CREATED)
+             status_code=status.HTTP_201_CREATED,
+             summary="Upload video for a game")
 async def upload_game_video(
         game_id: Annotated[int, Path()],
         video_file: Annotated[UploadFile, File(...)],
@@ -44,7 +45,8 @@ async def upload_game_video(
 
 @router.get("/{game_id}/highlights",
             status_code=status.HTTP_200_OK,
-            response_model=List[HighlightResponseSchema])
+            response_model=List[HighlightResponseSchema],
+            summary="Get highlights/interesting moves for a game")
 async def get_highlights(
         game_id: Annotated[int, Path()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
@@ -61,7 +63,8 @@ async def get_highlights(
 
 @router.get("/{game_id}/video-segments",
             status_code=status.HTTP_200_OK,
-            response_model=List[VideoSegmentResponseSchema])
+            response_model=List[VideoSegmentResponseSchema],
+            summary="Get processed video segments")
 async def get_video_segments(
         game_id: Annotated[int, Path()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],

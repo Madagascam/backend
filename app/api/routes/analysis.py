@@ -1,19 +1,20 @@
-from typing import Annotated, List
+from typing import Annotated
 
 from fastapi import Depends, APIRouter, BackgroundTasks, HTTPException, Path, status
 
 from app import User, Task, TaskType, TaskStatus
 from app.api.dependencies import get_current_user, get_uow
-from app.core.DTO import AnalysisResponseSchema, HighlightResponseSchema
+from app.core.DTO import AnalysisResponseSchema, HighlightResponseSchema, AnalysisResultResponseSchema
 from app.db import SQLAlchemyUnitOfWork
 from app.utils.helpers import run_analysis
 
-router = APIRouter(tags=["analysis"], prefix="/games/{game_id}/analysis")
+router = APIRouter(tags=["Analysis"], prefix="/api/games/{game_id}/analysis")
 
 
 @router.post("/",
              response_model=AnalysisResponseSchema,
-             status_code=status.HTTP_202_ACCEPTED)
+             status_code=status.HTTP_202_ACCEPTED,
+             summary="Start game analysis")
 async def start_game_analysis(
         game_id: int,
         background_tasks: BackgroundTasks,
@@ -45,7 +46,8 @@ async def start_game_analysis(
 
 
 @router.get("/status",
-            response_model=AnalysisResponseSchema)
+            response_model=AnalysisResponseSchema,
+            summary="Check analysis status")
 async def get_analysis_status(
         game_id: Annotated[int, Path()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
@@ -56,7 +58,8 @@ async def get_analysis_status(
 
 
 @router.get("/result",
-            response_model=List[HighlightResponseSchema])
+            response_model=AnalysisResultResponseSchema,
+            summary="Get analysis results")
 async def get_analysis_result(
         game_id: Annotated[int, Path()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
@@ -68,4 +71,6 @@ async def get_analysis_result(
 
     game = game[0]
 
-    return game.highlights
+    return AnalysisResultResponseSchema(pgn_data=game.pgn_data,
+                                        highlights=[HighlightResponseSchema.model_validate(hi) for hi in
+                                                    game.highlights])

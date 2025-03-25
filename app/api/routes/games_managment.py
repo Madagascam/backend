@@ -11,12 +11,14 @@ from app.core.DTO import GameResponseSchema, HighlightResponseSchema, \
     GameWithHighlightsResponseSchema
 from app.db import SQLAlchemyUnitOfWork
 
-router = APIRouter(tags=["games_managment"], prefix="/games")
+router = APIRouter(tags=["Games Managment"], prefix="/api/games")
 
 
 @router.post("/",
              response_model=GameResponseSchema,
-             status_code=status.HTTP_201_CREATED)
+             status_code=status.HTTP_201_CREATED,
+             summary="Create a new game with provided PGN data",
+             description="This endpoint has two purposes: create a new game and accept related pgn file")
 async def create_game_with_pgn(
         title: Annotated[str, Form(...)],
         pgn_file: Annotated[UploadFile, File(...)],
@@ -57,7 +59,8 @@ async def create_game_with_pgn(
 
 @router.get("/",
             response_model=List[GameResponseSchema],
-            status_code=status.HTTP_200_OK)
+            status_code=status.HTTP_200_OK,
+            summary="List all games for auth user")
 async def list_games(
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
         current_user: Annotated[User, Depends(get_current_user)],
@@ -67,7 +70,8 @@ async def list_games(
 
 @router.get("/{game_id}",
             response_model=GameWithHighlightsResponseSchema,
-            status_code=status.HTTP_200_OK)
+            status_code=status.HTTP_200_OK,
+            summary="Get game with provided game_id details")
 async def get_game(
         game_id: Annotated[int, Path()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
@@ -85,7 +89,9 @@ async def get_game(
     )
 
 
-@router.delete("/{game_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{game_id}",
+               status_code=status.HTTP_204_NO_CONTENT,
+               summary="Delete a game with provided game_id")
 async def delete_game(
         game_id: Annotated[int, Path()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],

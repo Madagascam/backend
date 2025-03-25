@@ -59,6 +59,7 @@ class GameResponseSchema(BaseModel):
     date: datetime
     white_player: str
     black_player: str
+    pgn_data: str
 
     class Config:
         from_attributes = True
@@ -74,13 +75,18 @@ class AnalysisResponseSchema(BaseModel):
 
 class HighlightResponseSchema(BaseModel):
     id: int
-    start_move: int
-    end_move: int
+    start_move: str
+    end_move: str
     description: str
     detected_by: str
 
     class Config:
         from_attributes = True
+
+
+class AnalysisResultResponseSchema(BaseModel):
+    pgn_data: str
+    highlights: List[HighlightResponseSchema]
 
 
 class GameWithHighlightsResponseSchema(BaseModel):
