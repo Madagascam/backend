@@ -16,7 +16,7 @@ class ThirdPartyAIStrategy(AbstractAnalysisStrategy):
 
     async def analyze(self,
                       pgn_data: str,
-                      prompt_file_path: str = 'app/analysis/prompts/prompt1.txt',
+                      prompt_file_path: str = 'app/ml/prompts/prompt1.txt',
                       model: str = "deepseek-r1",
                       verify: bool = True,
                       max_attempts: int = 4):
