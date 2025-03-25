@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
+from loguru import logger
 
 from app import User
 from app.core.DTO import UserCreateSchema, TokenSchema, UserResponseSchema
@@ -38,7 +39,8 @@ async def register(
     user = await uow.user.create(new_user)
     await uow.commit()
 
-    # Return user info (without password)
+    logger.info(f"New user: {user.username} registered")
+
     return UserResponseSchema.model_validate(user)
 
 
@@ -66,5 +68,7 @@ async def login_for_access_token(
             "role": user.role
         }
     )
+
+    logger.info(f"Created new access token for user: {user.username}. Logged in")
 
     return {"access_token": access_token, "token_type": "bearer"}

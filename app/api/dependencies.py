@@ -1,5 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from loguru import logger
 
 from app import User, UserRole
 from app.db import get_sql_sessionmaker, SQLAlchemyUnitOfWork
@@ -32,7 +33,8 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
 
-    return user
+    with logger.contextualize(user_id=user.id):
+        return user
 
 
 async def get_current_admin_user(
