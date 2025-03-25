@@ -1,5 +1,6 @@
 from app import TaskStatus, Highlight
 from app.db import get_sql_sessionmaker, SQLAlchemyUnitOfWork
+from app.ml import ChessAnalysisInterface
 
 
 async def run_analysis(game_id: int, task_id: int):
@@ -9,16 +10,16 @@ async def run_analysis(game_id: int, task_id: int):
             task.status = TaskStatus.PROCESSING
             await uow.commit()
 
-            # game = await uow.game.get(game_id)
-            # result = await analyze_game(game.pgn_data)
+            game = await uow.game.get(game_id)
 
-            results = [["10W", "15B", "WOW horse dies"], [18, 20, "РокировОчка"]]
+            analysis = ChessAnalysisInterface()
+            results = await analysis.analyze_game(game.pgn_data)
 
             for result in results:
                 highlight = Highlight(
                     start_move=result[0],
                     end_move=result[1],
-                    description=result[2],
+                    description=result[2] if len(result) > 2 else "Not provided",
                     game_id=game_id
                 )
                 await uow.highlight.create(highlight)
