@@ -9,7 +9,7 @@ from . import util
 from .safe1 import get_all_positions
 
 
-def fork(board: chess.Board, move: chess.Move, turn_color):
+async def fork(board: chess.Board, move: chess.Move, turn_color):
     flag = False
     if util.piece_type(board, move.to_square) == KING:
         return False
@@ -33,7 +33,8 @@ def fork(board: chess.Board, move: chess.Move, turn_color):
     if flag == True:
         return forked_figures
 
-def fork_check(moves, attacked_figures_squares, figure_square):
+
+async def fork_check(moves, attacked_figures_squares, figure_square):
     for i in range(len(moves)):
         move = moves[i]
         # Если фигура, объявившая вилку, сделала ход
@@ -55,7 +56,7 @@ def fork_check(moves, attacked_figures_squares, figure_square):
     return False
 
 
-def bishop_pin_to_king(board: chess.Board, figure_positions):
+async def bishop_pin_to_king(board: chess.Board, figure_positions):
     # if util.piece_type(board, move.to_square) != BISHOP:
     #     return False
 
@@ -84,7 +85,8 @@ def bishop_pin_to_king(board: chess.Board, figure_positions):
 
     return False
 
-def check_bishop_pin_to_king(prev_board, moves, attacked_square, bishop_square):
+
+async def check_bishop_pin_to_king(prev_board, moves, attacked_square, bishop_square):
     board = prev_board.copy()
     turn_color = board.turn
     for i in range(len(moves)):
@@ -120,7 +122,7 @@ def check_bishop_pin_to_king(prev_board, moves, attacked_square, bishop_square):
     return False
 
 
-def stockfish_moments(pgn_string, engine_path, threshold=290, analysis_depth=16):
+async def stockfish_moments(pgn_string, engine_path, threshold=290, analysis_depth=16):
     """
     Проходит по ходам партии и с помощью Stockfish определяет оценку каждой позиции.
     Если разница между соседними оценками превышает threshold,
@@ -142,7 +144,7 @@ def stockfish_moments(pgn_string, engine_path, threshold=290, analysis_depth=16)
     Возвращает:
       Список из интервалов интересных ходов.
     """
-    engine = chess.engine.SimpleEngine.popen_uci(engine_path)
+    transport, engine = await chess.engine.popen_uci(engine_path)
 
     game = chess.pgn.read_game(io.StringIO(pgn_string))
 
@@ -153,7 +155,7 @@ def stockfish_moments(pgn_string, engine_path, threshold=290, analysis_depth=16)
     # Получаем оценки для каждой позиции после каждого хода.
     for move in moves:
         board.push(move)
-        info = engine.analyse(board, chess.engine.Limit(depth=analysis_depth))
+        info = await engine.analyse(board, chess.engine.Limit(depth=analysis_depth))
         score = info["score"].white().score(mate_score=10000)
         #print(score)
         evaluations.append(score)
@@ -201,10 +203,11 @@ def stockfish_moments(pgn_string, engine_path, threshold=290, analysis_depth=16)
                 if len(moment_moves) > 3:
                     heuristic_moments.append((i-1, j))
 
-    engine.quit()
+    await engine.quit()
     return heuristic_moments
 
-def find_moments_without_stockfish(pgn_string):
+
+async def find_moments_without_stockfish(pgn_string):
     heuristic_moves = []
 
     game = chess.pgn.read_game(io.StringIO(pgn_string))
@@ -216,9 +219,9 @@ def find_moments_without_stockfish(pgn_string):
         board.push(move)
 
         figure_positions = get_all_positions(board)
-        forked_squares = fork(board, move, turn_color)
+        forked_squares = await fork(board, move, turn_color)
         if forked_squares != False:
-            result_fork = fork_check(moves[move_number + 1:], forked_squares, move.to_square)
+            result_fork = await fork_check(moves[move_number + 1:], forked_squares, move.to_square)
             if result_fork != False:
                 if move_number > 1:
                     result_fork += move_number
@@ -228,10 +231,10 @@ def find_moments_without_stockfish(pgn_string):
                     result_fork += move_number
                     #print(f"Найдена вилка с полухода {move_number} до {result_fork}")
                     heuristic_moves.append((move_number, result_fork))
-        squares_in_pin = bishop_pin_to_king(board, figure_positions)
+        squares_in_pin = await bishop_pin_to_king(board, figure_positions)
         if squares_in_pin != False:
             pinned_square, bishop_square = squares_in_pin
-            result_of_pin = check_bishop_pin_to_king(board, moves[move_number + 1:], pinned_square, bishop_square)
+            result_of_pin = await check_bishop_pin_to_king(board, moves[move_number + 1:], pinned_square, bishop_square)
             if result_of_pin != False:
                 if move_number > 1:
                     result_of_pin += move_number

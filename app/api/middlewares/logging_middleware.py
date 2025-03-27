@@ -11,7 +11,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         start_time = time.time()
 
         with logger.catch():
-            logger.info(f"\nRequest started: {request.method} {request.url.path}")
+            logger.info(f"Request started: {request.method} {request.url.path}")
 
             response = await call_next(request)
 

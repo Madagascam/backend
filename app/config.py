@@ -1,6 +1,5 @@
 from typing import Tuple, Type, List
 
-from pydantic import BaseModel
 from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict,
@@ -13,17 +12,17 @@ class FastAPISettings(BaseSettings):
     origins: List[str]
 
 
-class DatabaseSettings(BaseModel):
+class DatabaseSettings(BaseSettings):
     connection_string: str
 
 
-class SecuritySettings(BaseModel):
+class SecuritySettings(BaseSettings):
     secret_key: str
     algorithm: str
     access_token_expire_minutes: int
 
 
-class AnalysisSettings(BaseModel):
+class AnalysisSettings(BaseSettings):
     default_strategy: str
     engine_path: str
 
