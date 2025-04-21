@@ -1,3 +1,5 @@
+import asyncio
+
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from app.config import settings
@@ -11,7 +13,16 @@ async def initialize_database(engine):
 
 def get_sql_sessionmaker() -> async_sessionmaker:
     engine = create_async_engine(settings.database.connection_string)
-    # asyncio.run(initialize_database(engine))
+
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            loop.create_task(initialize_database(engine))
+        else:
+            loop.run_until_complete(initialize_database(engine))
+    except RuntimeError:
+        asyncio.run(initialize_database(engine))
+
     session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     return session_maker
