@@ -4,6 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
+from app.core.analysis_base.analysis_interface import StrategyType
 from sqlalchemy import ForeignKey, String, Text, Integer
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -131,6 +132,8 @@ class Task(Base, TimestampMixin):
     type: Mapped[TaskType] = mapped_column(SQLAEnum(TaskType))
     status: Mapped[TaskStatus] = mapped_column(SQLAEnum(TaskStatus), default=TaskStatus.PENDING)
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    strategy_type: Mapped[Optional[StrategyType]] = mapped_column(SQLAEnum(StrategyType), nullable=True,
+                                                                  default=StrategyType.ANALYTICS)
 
     # Relationships
     game_id: Mapped[int] = mapped_column(ForeignKey("games.id"))
