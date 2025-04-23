@@ -2,6 +2,7 @@ from loguru import logger
 
 from app import TaskStatus, Highlight
 from app.core import ChessAnalysisInterface
+from app.core.analysis_base.analysis_interface import StrategyType
 from app.db import get_sql_sessionmaker, SQLAlchemyUnitOfWork
 
 
@@ -16,7 +17,15 @@ async def run_analysis(game_id: int, task_id: int):
 
             game = await uow.game.get(game_id)
 
+            strategy_type = task.strategy_type or StrategyType.ANALYTICS
+            logger.info(f"Using strategy: {strategy_type} for game with id: {game_id}")
+            
             analysis = ChessAnalysisInterface()
+
+            # Устанавливаем стратегию анализа
+            analysis.set_strategy(strategy_type)
+
+            # Используем выбранную стратегию для анализа
             results = await analysis.analyze_game(game.pgn_data)
 
             for result in results:
@@ -29,7 +38,7 @@ async def run_analysis(game_id: int, task_id: int):
                 await uow.highlight.create(highlight)
 
             task.status = TaskStatus.COMPLETED
-            logger.info(f"Analysis completed for game with id: {game_id}")
+            logger.info(f"Analysis completed for game with id: {game_id} using strategy: {strategy_type}")
             await uow.commit()
 
         except Exception as e:
