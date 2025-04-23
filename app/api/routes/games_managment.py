@@ -5,7 +5,7 @@ from typing import Annotated, List
 import chess.pgn
 from fastapi import Form, Depends, APIRouter, UploadFile, File, HTTPException, status, Path
 
-from app import User, Game
+from app import User, Game, Video
 from app.api.dependencies import get_current_user, get_uow
 from app.core.DTO import GameResponseSchema, HighlightResponseSchema, \
     GameWithHighlightsResponseSchema
@@ -22,6 +22,7 @@ router = APIRouter(tags=["Games Managment"], prefix="/api/games")
 async def create_game_with_pgn(
         title: Annotated[str, Form(...)],
         pgn_file: Annotated[UploadFile, File(...)],
+        video_links: Annotated[List[str], Form()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
         current_user: Annotated[User, Depends(get_current_user)],
 ):
@@ -52,6 +53,17 @@ async def create_game_with_pgn(
     )
 
     await uow.game.create(game)
+
+    # Create videos from the provided links
+    for link in video_links:
+        video = Video(
+            original_video_url=link,
+            processed_video_url="",  # Will be updated after processing
+            status="uploaded",
+            game_id=game.id
+        )
+        await uow.video.create(video)
+    
     await uow.commit()
 
     return game

@@ -1,7 +1,6 @@
-import os
 from typing import Annotated, List
 
-from fastapi import Depends, APIRouter, UploadFile, File, HTTPException, Path, status
+from fastapi import Depends, APIRouter, HTTPException, Path, status, Body
 
 from app import User, Video
 from app.api.dependencies import get_current_user, get_uow
@@ -11,12 +10,12 @@ from app.db import SQLAlchemyUnitOfWork
 router = APIRouter(tags=["Game content"], prefix="/api/games")
 
 
-@router.post("/{game_id}/video",
+@router.post("/{game_id}/videos",
              status_code=status.HTTP_201_CREATED,
-             summary="Upload video for a game")
-async def upload_game_video(
+             summary="Add videos for a game")
+async def add_game_videos(
         game_id: Annotated[int, Path()],
-        video_file: Annotated[UploadFile, File(...)],
+        video_links: Annotated[List[str], Body()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
         current_user: Annotated[User, Depends(get_current_user)],
 ):
@@ -24,23 +23,22 @@ async def upload_game_video(
     if not game:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
 
-    os.makedirs("uploads/videos", exist_ok=True)
+    created_videos = []
 
-    video_path = f"uploads/videos/{game_id}_{video_file.filename}"
-    with open(video_path, "wb") as f:
-        f.write(await video_file.read())
+    for link in video_links:
+        video = Video(
+            original_video_url=link,
+            processed_video_url="",  # Will be updated after processing
+            status="uploaded",
+            game_id=game_id
+        )
 
-    video = Video(
-        original_video_url=video_path,
-        processed_video_url="",  # Will be updated after processing
-        status="uploaded",
-        game_id=game_id
-    )
-
-    await uow.video.create(video)
+        await uow.video.create(video)
+        created_videos.append(video)
+    
     await uow.commit()
 
-    return {"message": "Video uploaded successfully", "video_id": video.id}
+    return {"message": f"{len(created_videos)} videos added successfully", "video_ids": [v.id for v in created_videos]}
 
 
 @router.get("/{game_id}/highlights",
@@ -77,6 +75,9 @@ async def get_video_segments(
     game = game[0]
     result = []
 
+    # Get all videos for this game
+    videos = await uow.video.get_all(game_id=game_id)
+    
     for highlight in game.highlights:
         video_segment = await highlight.awaitable_attrs.video_segment
         if video_segment is not None:

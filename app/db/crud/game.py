@@ -17,7 +17,7 @@ class GameRepository(SQLAlchemyRepository[Game]):
         statement = select(Game).where(Game.id == game_id).options(
             selectinload(Game.user),
             selectinload(Game.highlights),
-            selectinload(Game.video),
+            selectinload(Game.videos),
             selectinload(Game.tasks)
         )
         result = await self.session.execute(statement)
@@ -27,7 +27,7 @@ class GameRepository(SQLAlchemyRepository[Game]):
         statement = select(Game).options(
             selectinload(Game.user),
             selectinload(Game.highlights),
-            selectinload(Game.video),
+            selectinload(Game.videos),
             selectinload(Game.tasks)
         )
 
@@ -38,7 +38,7 @@ class GameRepository(SQLAlchemyRepository[Game]):
     async def get_by_user_id(self, user_id: int) -> Sequence[Game]:
         statement = select(Game).where(Game.user_id == user_id).options(
             selectinload(Game.highlights),
-            selectinload(Game.video),
+            selectinload(Game.videos),
             selectinload(Game.tasks)
         )
         result = await self.session.execute(statement)
@@ -51,7 +51,7 @@ class GameRepository(SQLAlchemyRepository[Game]):
         ).options(
             selectinload(Game.user),
             selectinload(Game.highlights),
-            selectinload(Game.video),
+            selectinload(Game.videos),
             selectinload(Game.tasks)
         )
         result = await self.session.execute(statement)

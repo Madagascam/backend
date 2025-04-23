@@ -58,7 +58,7 @@ class Game(Base, TimestampMixin):
     user: Mapped[Optional["User"]] = relationship(back_populates="games")
 
     highlights: Mapped[List["Highlight"]] = relationship(back_populates="game")
-    video: Mapped[Optional["Video"]] = relationship(back_populates="game", uselist=False)
+    videos: Mapped[List["Video"]] = relationship(back_populates="game")
     tasks: Mapped[List["Task"]] = relationship(back_populates="game", cascade="all, delete-orphan")
 
 
@@ -86,9 +86,9 @@ class Video(Base, TimestampMixin):
     processed_video_url: Mapped[str] = mapped_column(String(255))
     status: Mapped[str] = mapped_column(String(50))
 
-    # Relationships with unique constraint for one-to-one
-    game_id: Mapped[Optional[int]] = mapped_column(ForeignKey("games.id"), unique=True, nullable=True)
-    game: Mapped[Optional["Game"]] = relationship(back_populates="video")
+    # Relationships - removed unique constraint for one-to-many
+    game_id: Mapped[Optional[int]] = mapped_column(ForeignKey("games.id"), nullable=True)
+    game: Mapped[Optional["Game"]] = relationship(back_populates="videos")
 
     segments: Mapped[List["VideoSegment"]] = relationship(back_populates="video")
 
