@@ -1,6 +1,6 @@
 import io
 from datetime import datetime
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 
 import chess.pgn
 from fastapi import Form, Depends, APIRouter, UploadFile, File, HTTPException, status, Path
@@ -20,12 +20,15 @@ router = APIRouter(tags=["Games Managment"], prefix="/api/games")
              summary="Create a new game with provided PGN data",
              description="This endpoint has two purposes: create a new game and accept related pgn file")
 async def create_game_with_pgn(
-        title: Annotated[str, Form(...)],
-        pgn_file: Annotated[UploadFile, File(...)],
-        video_links: Annotated[List[str], Form()],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
         current_user: Annotated[User, Depends(get_current_user)],
+        title: Annotated[str, Form(...)],
+        pgn_file: Annotated[UploadFile, File(...)],
+        video_links: Annotated[Optional[List[str]], Form()] = None,
 ):
+    if video_links is None:
+        video_links = []
+
     pgn_content = await pgn_file.read()
     pgn_text = pgn_content.decode("utf-8")
 
