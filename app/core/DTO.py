@@ -4,6 +4,7 @@ from typing import Optional, List
 from pydantic import BaseModel
 
 from app import UserRole
+from app.core import StrategyType
 
 
 class TokenSchema(BaseModel):
@@ -98,3 +99,7 @@ class VideoSegmentResponseSchema(BaseModel):
     id: int
     start_move: int
     end_move: int
+
+
+class AnalysisRequest(BaseModel):
+    strategy_type: StrategyType = StrategyType.ANALYTICS
