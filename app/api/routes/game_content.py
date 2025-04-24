@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 
 from app import User, Video
 from app.api.dependencies import get_current_user, get_uow
-from app.core.DTO import HighlightResponseSchema
+from app.core.DTO import HighlightResponseSchema, VideoSegmentResponseSchema
 from app.db import SQLAlchemyUnitOfWork
 
 router = APIRouter(tags=["Game content"], prefix="/api/games")
@@ -63,7 +63,7 @@ async def get_highlights(
 
 @router.get("/{game_id}/video-segments",
             status_code=status.HTTP_200_OK,
-            response_model=List[int],
+            response_model=VideoSegmentResponseSchema,
             summary="Get processed video segments")
 async def get_video_segments(
         game_id: Annotated[int, Path()],
@@ -75,15 +75,20 @@ async def get_video_segments(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
 
     game = game[0]
-    result = []
+    highlights = []
+    video_segments = []
 
     for highlight in game.highlights:
-        result.append(highlight.video_segment.id)
-    print(result)
-    return result
+        highlights.append(HighlightResponseSchema.model_validate(highlight))
+        video_segments.append(highlight.video_segment.id)
+
+    return VideoSegmentResponseSchema(
+        highlights=highlights,
+        video_segments=video_segments,
+    )
 
 
-@router.get("/{game_id}/video-segments/{segment_id}",
+@router.get("/{game_id}/video-segments/{segment_id}/stream",
             summary="Stream a video segment")
 async def stream_video_segment(
         game_id: Annotated[int, Path()],

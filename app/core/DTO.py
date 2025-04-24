@@ -101,9 +101,8 @@ class GameWithHighlightsResponseSchema(BaseModel):
 
 
 class VideoSegmentResponseSchema(BaseModel):
-    id: int
-    start_move: int
-    end_move: int
+    video_segments: List[int]
+    highlights: List[HighlightResponseSchema]
 
 
 class AnalysisRequest(BaseModel):
