@@ -97,10 +97,17 @@ async def get_game(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
 
     game = game[0]
+    highlights = []
+    video_segments = []
+
+    for highlight in game.highlights:
+        highlights.append(HighlightResponseSchema.model_validate(highlight))
+        video_segments.append(highlight.video_segment.id if highlight.video_segment else -1)
 
     return GameWithHighlightsResponseSchema(
         game=GameResponseSchema.model_validate(game),
-        highlights=[HighlightResponseSchema.model_validate(hi) for hi in game.highlights]
+        highlights=highlights,
+        video_segments=video_segments
     )
 
 

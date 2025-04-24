@@ -43,7 +43,6 @@ async def start_game_analysis(
     await uow.task.create(analysis_task)
     background_tasks.add_task(run_analysis, game_id, analysis_task.id)
 
-    # Инициализируем response
     response = AnalysisResponseSchema(
         analysis_id=analysis_task.id,
         video_id=-1
