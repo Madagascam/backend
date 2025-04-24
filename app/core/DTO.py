@@ -97,6 +97,7 @@ class AnalysisResultResponseSchema(BaseModel):
 class GameWithHighlightsResponseSchema(BaseModel):
     game: GameResponseSchema
     highlights: List[HighlightResponseSchema]
+    video_segments: List[int]
 
 
 class VideoSegmentResponseSchema(BaseModel):

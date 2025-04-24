@@ -4,11 +4,12 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from app.core.analysis_base.analysis_interface import StrategyType
 from sqlalchemy import ForeignKey, String, Text, Integer
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLAEnum
+
+from app.core.analysis_base.analysis_interface import StrategyType
 
 
 class Base(DeclarativeBase, AsyncAttrs):
@@ -100,7 +101,7 @@ class VideoSegment(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     start_time: Mapped[int] = mapped_column(Integer)
     end_time: Mapped[int] = mapped_column(Integer)
-    sequence_order: Mapped[int] = mapped_column(Integer)
+    url: Mapped[str] = mapped_column(String(255))
 
     # Relationships
     video_id: Mapped[Optional[int]] = mapped_column(ForeignKey("videos.id"), nullable=True)
