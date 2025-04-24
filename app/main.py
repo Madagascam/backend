@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.middlewares import LoggingMiddleware
-from app.api.routes import auth_router, game_content_router, profile_router, games_managment_router, analysis_router
+from app.api.routes import auth_router, game_content_router, profile_router, games_managment_router, analysis_router, \
+    tasks_router
 from app.utils.logging import setup_logging
 
 
@@ -25,6 +26,7 @@ def main():
     app.include_router(profile_router)
     app.include_router(games_managment_router)
     app.include_router(analysis_router)
+    app.include_router(tasks_router)
 
     # Logging
     setup_logging()

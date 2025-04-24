@@ -1,13 +1,13 @@
 from typing import Annotated
 
-from fastapi import Depends, APIRouter, BackgroundTasks, HTTPException, Path, status
+from fastapi import Depends, APIRouter, BackgroundTasks, HTTPException, Path, status, Body
 from loguru import logger
 
 from app import User, Task, TaskType, TaskStatus
 from app.api.dependencies import get_current_user, get_uow
-from app.core.DTO import AnalysisResponseSchema, HighlightResponseSchema, AnalysisResultResponseSchema
+from app.core.DTO import AnalysisResponseSchema, HighlightResponseSchema, AnalysisResultResponseSchema, AnalysisRequest
 from app.db import SQLAlchemyUnitOfWork
-from app.utils.helpers import run_analysis
+from app.utils.helpers import run_analysis, run_video_cut
 
 router = APIRouter(tags=["Analysis"], prefix="/api/games/{game_id}/analysis")
 
@@ -17,10 +17,11 @@ router = APIRouter(tags=["Analysis"], prefix="/api/games/{game_id}/analysis")
              status_code=status.HTTP_202_ACCEPTED,
              summary="Start game analysis")
 async def start_game_analysis(
-        game_id: int,
-        background_tasks: BackgroundTasks,
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
         current_user: Annotated[User, Depends(get_current_user)],
+        game_id: Annotated[int, Path(title='Id of the game to analyze')],
+        background_tasks: BackgroundTasks,
+        analysis_request: Annotated[AnalysisRequest, Body()]
 ):
     game = await uow.game.get_all(id=game_id, user_id=current_user.id)
     if not game:
@@ -35,36 +36,43 @@ async def start_game_analysis(
         type=TaskType.GAME_ANALYSIS,
         status=TaskStatus.PENDING,
         game_id=game_id,
-        user_id=current_user.id
+        user_id=current_user.id,
+        strategy_type=analysis_request.strategy_type
     )
 
     await uow.task.create(analysis_task)
+    background_tasks.add_task(run_analysis, game_id, analysis_task.id)
+
+    response = AnalysisResponseSchema(
+        analysis_id=analysis_task.id,
+        video_id=-1
+    )
+
+    if analysis_request.create_video is True:
+        video_task = Task(
+            type=TaskType.VIDEO_PROCESSING,
+            status=TaskStatus.PENDING,
+            game_id=game_id,
+            user_id=current_user.id,
+        )
+
+        await uow.task.create(video_task)
+        background_tasks.add_task(run_video_cut, game_id, video_task.id, analysis_task.id)
+        response.video_id = video_task.id
+
     await uow.commit()
 
-    background_tasks.add_task(run_analysis, game_id, analysis_task.id)
-    logger.info(f"Added analysis task with id: {analysis_task.id} for game with id: {game_id}")
+    logger.info(
+        f"Added analysis task with id: {analysis_task.id} for game with id: {game_id} with strategy: {analysis_task.strategy_type}")
 
-    return analysis_task
-
-
-@router.get("/status",
-            response_model=AnalysisResponseSchema,
-            summary="Check analysis status")
-async def get_analysis_status(
-        game_id: Annotated[int, Path()],
-        uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
-        current_user: Annotated[User, Depends(get_current_user)]
-):
-    task = await uow.task.get_by_game_id(game_id)
-    logger.info(f"Got analysis task with id: {task[-1].id} for game with id: {game_id}")
-    return task[-1]
+    return response
 
 
 @router.get("/result",
             response_model=AnalysisResultResponseSchema,
             summary="Get analysis results")
 async def get_analysis_result(
-        game_id: Annotated[int, Path()],
+        game_id: Annotated[int, Path(title='Id of the game to analyze')],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
         current_user: Annotated[User, Depends(get_current_user)]
 ):

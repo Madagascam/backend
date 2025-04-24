@@ -66,9 +66,13 @@ class GameResponseSchema(BaseModel):
         from_attributes = True
 
 
-class AnalysisResponseSchema(BaseModel):
+class TaskStatusResponseSchema(BaseModel):
     id: int
     status: str
+
+class AnalysisResponseSchema(BaseModel):
+    analysis_id: int = 0
+    video_id: int = -1  # -1, если видео не запрашивалось
 
     class Config:
         from_attributes = True
@@ -93,13 +97,14 @@ class AnalysisResultResponseSchema(BaseModel):
 class GameWithHighlightsResponseSchema(BaseModel):
     game: GameResponseSchema
     highlights: List[HighlightResponseSchema]
+    video_segments: List[int]
 
 
 class VideoSegmentResponseSchema(BaseModel):
-    id: int
-    start_move: int
-    end_move: int
+    video_segments: List[int]
+    highlights: List[HighlightResponseSchema]
 
 
 class AnalysisRequest(BaseModel):
     strategy_type: StrategyType = StrategyType.ANALYTICS
+    create_video: bool = False

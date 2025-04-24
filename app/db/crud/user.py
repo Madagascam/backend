@@ -36,11 +36,3 @@ class UserRepository(SQLAlchemyRepository[User]):
 
         result = await self.session.execute(statement)
         return result.scalars().all()
-
-    async def get_by_username(self, username: str) -> Optional[User]:
-        statement = select(User).where(User.username == username).options(
-            selectinload(User.games),
-            selectinload(User.tasks)
-        )
-        result = await self.session.execute(statement)
-        return result.scalars().first()

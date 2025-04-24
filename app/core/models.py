@@ -4,11 +4,12 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from app.core.analysis_base.analysis_interface import StrategyType
 from sqlalchemy import ForeignKey, String, Text, Integer
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLAEnum
+
+from app.core.analysis_base.analysis_interface import StrategyType
 
 
 class Base(DeclarativeBase, AsyncAttrs):
@@ -59,7 +60,7 @@ class Game(Base, TimestampMixin):
     user: Mapped[Optional["User"]] = relationship(back_populates="games")
 
     highlights: Mapped[List["Highlight"]] = relationship(back_populates="game")
-    video: Mapped[Optional["Video"]] = relationship(back_populates="game", uselist=False)
+    videos: Mapped[List["Video"]] = relationship(back_populates="game")
     tasks: Mapped[List["Task"]] = relationship(back_populates="game", cascade="all, delete-orphan")
 
 
@@ -87,9 +88,9 @@ class Video(Base, TimestampMixin):
     processed_video_url: Mapped[str] = mapped_column(String(255))
     status: Mapped[str] = mapped_column(String(50))
 
-    # Relationships with unique constraint for one-to-one
-    game_id: Mapped[Optional[int]] = mapped_column(ForeignKey("games.id"), unique=True, nullable=True)
-    game: Mapped[Optional["Game"]] = relationship(back_populates="video")
+    # Relationships - removed unique constraint for one-to-many
+    game_id: Mapped[Optional[int]] = mapped_column(ForeignKey("games.id"), nullable=True)
+    game: Mapped[Optional["Game"]] = relationship(back_populates="videos")
 
     segments: Mapped[List["VideoSegment"]] = relationship(back_populates="video")
 
@@ -100,7 +101,7 @@ class VideoSegment(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     start_time: Mapped[int] = mapped_column(Integer)
     end_time: Mapped[int] = mapped_column(Integer)
-    sequence_order: Mapped[int] = mapped_column(Integer)
+    url: Mapped[str] = mapped_column(String(255))
 
     # Relationships
     video_id: Mapped[Optional[int]] = mapped_column(ForeignKey("videos.id"), nullable=True)

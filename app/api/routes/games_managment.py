@@ -1,11 +1,11 @@
 import io
 from datetime import datetime
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 
 import chess.pgn
 from fastapi import Form, Depends, APIRouter, UploadFile, File, HTTPException, status, Path
 
-from app import User, Game
+from app import User, Game, Video
 from app.api.dependencies import get_current_user, get_uow
 from app.core.DTO import GameResponseSchema, HighlightResponseSchema, \
     GameWithHighlightsResponseSchema
@@ -20,11 +20,15 @@ router = APIRouter(tags=["Games Managment"], prefix="/api/games")
              summary="Create a new game with provided PGN data",
              description="This endpoint has two purposes: create a new game and accept related pgn file")
 async def create_game_with_pgn(
-        title: Annotated[str, Form(...)],
-        pgn_file: Annotated[UploadFile, File(...)],
         uow: Annotated[SQLAlchemyUnitOfWork, Depends(get_uow)],
         current_user: Annotated[User, Depends(get_current_user)],
+        title: Annotated[str, Form(...)],
+        pgn_file: Annotated[UploadFile, File(...)],
+        video_links: Annotated[Optional[List[str]], Form()] = None,
 ):
+    if video_links is None:
+        video_links = []
+
     pgn_content = await pgn_file.read()
     pgn_text = pgn_content.decode("utf-8")
 
@@ -52,6 +56,17 @@ async def create_game_with_pgn(
     )
 
     await uow.game.create(game)
+
+    # Create videos from the provided links
+    for link in video_links:
+        video = Video(
+            original_video_url=link,
+            processed_video_url="",  # Will be updated after processing
+            status="uploaded",
+            game_id=game.id
+        )
+        await uow.video.create(video)
+    
     await uow.commit()
 
     return game
@@ -82,10 +97,17 @@ async def get_game(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
 
     game = game[0]
+    highlights = []
+    video_segments = []
+
+    for highlight in game.highlights:
+        highlights.append(HighlightResponseSchema.model_validate(highlight))
+        video_segments.append(highlight.video_segment.id if highlight.video_segment else -1)
 
     return GameWithHighlightsResponseSchema(
         game=GameResponseSchema.model_validate(game),
-        highlights=[HighlightResponseSchema.model_validate(hi) for hi in game.highlights]
+        highlights=highlights,
+        video_segments=video_segments
     )
 
 
