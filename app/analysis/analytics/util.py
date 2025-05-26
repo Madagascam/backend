@@ -1,8 +1,8 @@
 from typing import List, Tuple
-
 import chess
 from chess import Color, Board, Square, Piece
 from chess import KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN, WHITE, BLACK
+
 
 values = { PAWN: 1, KNIGHT: 3, BISHOP: 3, ROOK: 5, QUEEN: 9 }
 king_values = { PAWN: 1, KNIGHT: 3, BISHOP: 3, ROOK: 5, QUEEN: 9, KING: 99 }
@@ -285,19 +285,10 @@ def merge_intervals(intervals):
             merged.append(current)
     return merged
 
-def transform_format(moves_intervals):
-    if not moves_intervals:
-        return []
+def intervals_format(intervals: List) -> List:
     new_intervals = []
-    for interval in moves_intervals:
-        move_left, move_right = interval
-        if move_left % 2 == 0:
-            move_left = f"{move_left//2 + 1}W"
-        else:
-            move_left = f"{move_left//2 + 1}B"
-        if move_right % 2 == 0:
-            move_right = f"{move_right//2 + 1}W"
-        else:
-            move_right = f"{move_right//2 + 1}B"
-        new_intervals.append((move_left, move_right))
+    for interval in intervals:
+        a = f"{(interval[0] + 1) // 2}{'W' if interval[0] % 2 else 'B'}"
+        b = f"{(interval[1] + 1) // 2}{'W' if interval[1] % 2 else 'B'}"
+        new_intervals.append((a,b))
     return new_intervals
