@@ -504,7 +504,7 @@ def find_all_moments(pgn_string, engine_path):
     return intervals_format(merge_intervals(moments))
 
 
-pgn_string = "1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d6 5. Nxf7 Be6 6. Nxh8 Bxc4 7. Qh5+ Nxh5 8. d3 Be6"
-engine_path = "C:/Users/Thinkpad/Desktop/Гоша/Friflex/stockfish-windows-x86-64-avx2/stockfish/stockfish-windows-x86-64-avx2.exe"
-print(find_all_moments(pgn_string, engine_path))
-print(find_moments_without_stockfish(pgn_string))
+# pgn_string = "1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d6 5. Nxf7 Be6 6. Nxh8 Bxc4 7. Qh5+ Nxh5 8. d3 Be6"
+# engine_path = "C:/Users/Thinkpad/Desktop/Гоша/Friflex/stockfish-windows-x86-64-avx2/stockfish/stockfish-windows-x86-64-avx2.exe"
+# print(find_all_moments(pgn_string, engine_path))
+# print(find_moments_without_stockfish(pgn_string))
