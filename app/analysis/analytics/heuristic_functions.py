@@ -4,7 +4,7 @@ from typing import List, Tuple, Dict, Set
 import chess
 import chess.pgn
 import chess.engine
-from util import merge_intervals, is_in_bad_spot, intervals_format
+from .util import merge_intervals, is_in_bad_spot, intervals_format
 
 # --- «цена» фигур в пешках -----------------------------------------------
 PIECE_VALUE = {
@@ -437,7 +437,7 @@ def detect_sacrifices(pgn: str) -> List[Tuple[str, str]]:
     return result
 
 
-def stockfish_moments(
+async def stockfish_moments(
     pgn_string: str,
     engine_path: str,
     threshold: int = 290,
@@ -449,11 +449,11 @@ def stockfish_moments(
     Интервал дополнительно растягивается `extend_interval`, а
     в результат попадают только те, что длиннее 3 полуходов.
     """
-    engine = chess.engine.SimpleEngine.popen_uci(engine_path)
+    transport, engine = await chess.engine.popen_uci(engine_path)
 
     game = chess.pgn.read_game(io.StringIO(pgn_string))
     if game is None:
-        engine.quit()
+        await engine.quit()
         raise ValueError("PGN-строка не содержит партию.")
 
     # ── 1. собираем все оценки (позиция *после* каждого хода) ──
@@ -461,7 +461,7 @@ def stockfish_moments(
     moves = list(game.mainline_moves())
 
     evaluations: List[int] = [
-        engine.analyse(board, chess.engine.Limit(depth=analysis_depth))["score"]
+        (await engine.analyse(board, chess.engine.Limit(depth=analysis_depth)))["score"]
         .white()
         .score(mate_score=10000)
     ]
@@ -469,7 +469,7 @@ def stockfish_moments(
     for mv in moves:
         board.push(mv)
         cp = (
-            engine.analyse(board, chess.engine.Limit(depth=analysis_depth))["score"]
+            (await engine.analyse(board, chess.engine.Limit(depth=analysis_depth)))["score"]
             .white()
             .score(mate_score=10000)
         )
@@ -490,7 +490,7 @@ def stockfish_moments(
             if end_tag - start_tag > 2:
                 result.append((start_tag, end_tag))
 
-    engine.quit()
+    await engine.quit()
     return result
 
 
@@ -499,8 +499,8 @@ def find_moments_without_stockfish(pgn_string):
     moments = detect_forks(pgn_string) + detect_pins(pgn_string) + detect_sacrifices(pgn_string) + detect_sacrifices(pgn_string)
     return intervals_format(merge_intervals(moments))
 
-def find_all_moments(pgn_string, engine_path):
-    moments = detect_forks(pgn_string) + detect_pins(pgn_string) + detect_sacrifices(pgn_string) + detect_sacrifices(pgn_string) + stockfish_moments(pgn_string, engine_path)
+async def find_all_moments(pgn_string, engine_path):
+    moments = detect_forks(pgn_string) + detect_pins(pgn_string) + detect_sacrifices(pgn_string) + detect_sacrifices(pgn_string) + (await stockfish_moments(pgn_string, engine_path))
     return intervals_format(merge_intervals(moments))
 
 
