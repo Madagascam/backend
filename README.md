@@ -1,161 +1,94 @@
-## 📌 Chess Analysis Backend
+# ♟️ Chess Analysis Backend
 
-Backend-сервис для загрузки, анализа и обработки шахматных партий.
-Разрабатывался в команде из 6 человек (backend, ML, frontend).
+Backend service for uploading, processing and analyzing chess games.
 
-Проект реализует **слоистую архитектуру** с использованием паттернов
-**Repository**, **Unit of Work** и **Strategy**, что обеспечивает расширяемость, тестируемость и гибкость выбора алгоритмов анализа.
-
-
-## 🚀 Основной функционал
-
-* Загрузка и хранение шахматных партий (PGN)
-* Анализ партий с использованием разных стратегий
-* Генерация видео с ключевыми моментами партии
-* Просмотр результатов анализа
-* Авторизация пользователей
-* Асинхронная обработка задач
-
-## 🧩 Архитектура
-
-Проект построен по принципам clean architecture:
-
-```
-API (FastAPI)
-↓
-Application / Services (бизнес-логика)
-↓
-Domain (модели)
-↓
-Infrastructure (DB, external services, video processing)
-```
-
-## 🧱 Ключевые архитектурные решения
-
-### 🔹 Strategy pattern (анализ партий)
-
-Разные алгоритмы анализа вынесены в отдельные стратегии с единым интерфейсом:
-
-* `AnalyticsStrategy`
-* `ProjectAIStrategy`
-* `ThirdPartyAIStrategy`
-* `FakeStrategy`
-
-Выбор стратегии происходит во время выполнения:
-
-* стратегия передаётся через API (`strategy_type`)
-* устанавливается через `ChessAnalysisInterface`
-* применяется в `ChessAnalyzer`
-
-Это позволяет:
-
-* легко добавлять новые алгоритмы анализа
-* переключать поведение без изменения бизнес-логики
-* изолировать ML/AI-интеграции
-
-
-### 🔹 Repository pattern
-
-* Абстракция доступа к данным
-* Изоляция бизнес-логики от БД
-* Упрощение тестирования
+The system allows users to upload PGN files, run asynchronous analysis and retrieve structured insights about the game.
 
 
 
-### 🔹 Unit of Work
+## 🚀 Features
 
-* Управление транзакциями
-* Гарантия атомарности операций
-* Консистентность данных при обработке задач
-
-
-
-### 🔹 Dependency Injection
-
-* Использование FastAPI Depends
-* Явное управление зависимостями
-* Удобство тестирования
+* Upload and parse chess games (PGN format)
+* Asynchronous game analysis
+* Multiple analysis strategies (pluggable)
+* Background task processing
+* Optional video generation
+* REST API for managing games and results
 
 
-## ⚙️ Асинхронная обработка
 
-* Асинхронные обработчики FastAPI
-* Async SQLAlchemy + asyncpg
-* BackgroundTasks для выполнения долгих операций
-* I/O-bound операции (БД, HTTP-запросы, файловая система)
+## 🧠 Architecture
 
+The project is structured as a layered backend application:
 
-## 🎬 Обработка видео
+* **API layer** — request handling (FastAPI routers)
+* **Core / domain layer** — analysis logic and strategies
+* **Infrastructure layer** — database, tasks, integrations
 
-* Генерация видео с ключевыми моментами партии
-* Определение временных сегментов по PGN
-* Объединение и нарезка видеофрагментов
-* Работа с несколькими видеоисточниками
+Key concepts used in the project:
 
-📈 Оптимизация:
-
-* время обработки сокращено: **80 → 20 секунд (x4)** за счёт распараллеливания
+* **Strategy pattern** — switch between different analysis implementations
+* **Unit of Work** — manage database transactions
+* **Background tasks** — handle long-running operations
+* **Separation of concerns** — clear boundaries between layers
 
 
-## 🔌 Интеграция с ML
 
-* Взаимодействие через HTTP API
-* Поддержка нескольких стратегий анализа
-* Обработка ошибок и retry логика
-* Асинхронные вызовы
+## ⚙️ How It Works
+
+1. User uploads a PGN file
+2. Game is parsed and stored
+3. Analysis task is created
+4. Background worker processes the game
+5. Results are saved and exposed via API
 
 
-## 🧰 Технологии
+
+## 🛠 Tech Stack
 
 * Python 3.12
 * FastAPI
-* SQLAlchemy 2 (async)
+* SQLAlchemy
 * PostgreSQL
-* httpx
-* pytest
+* Redis
+* Celery
 * Docker
-* OpenCV
-* python-chess
 
 
-## 🧪 Тестирование
 
-* Unit и интеграционные тесты
-* Проверка бизнес-логики и API
-* Частичное использование TDD
+## 📌 Example Flow
+
+```text
+Upload PGN → Create Game → Run Analysis → Get Results
+```
 
 
-## 🐳 Запуск проекта
+
+## 📦 Project Structure
+
+```text
+app/
+  api/          # routes
+  core/         # domain logic
+  services/     # business logic
+  models/       # database models
+```
+
+
+
+## ⚙️ Run Locally
 
 ```bash
-git clone https://github.com/Madagascam/backend
-cd backend
 docker-compose up --build
 ```
 
 
-## 📊 Производительность
 
-* Обработка видео ускорена в **4 раза**
-* Асинхронная обработка задач
-* Оптимизированы I/O операции
+## 🎯 Purpose
 
+* Practice backend architecture design
+* Work with async processing and task queues
+* Build a system that handles non-trivial workflows
 
-## 👨‍💻 Моя роль
-
-* Разработка backend API на FastAPI
-* Проектирование архитектуры (слои, UoW, Repository)
-* Реализация Strategy pattern для анализа партий
-* Интеграция с ML-модулем
-* Реализация обработки видео
-* Оптимизация производительности
-* Написание тестов (pytest)
-* Участие в code review и командной разработке
-
-
-## 📎 Примечание
-
-Проект учебный, но реализован с использованием production-подходов:
-слоистая архитектура, паттерны проектирования, асинхронность, тестируемость, контейнеризация.
 
 
