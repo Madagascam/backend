@@ -6,7 +6,6 @@ Backend-сервис для загрузки, анализа и обработк
 Проект реализует **слоистую архитектуру** с использованием паттернов
 **Repository**, **Unit of Work** и **Strategy**, что обеспечивает расширяемость, тестируемость и гибкость выбора алгоритмов анализа.
 
----
 
 ## 🚀 Основной функционал
 
@@ -16,8 +15,6 @@ Backend-сервис для загрузки, анализа и обработк
 * Просмотр результатов анализа
 * Авторизация пользователей
 * Асинхронная обработка задач
-
----
 
 ## 🧩 Архитектура
 
@@ -32,8 +29,6 @@ Domain (модели)
 ↓
 Infrastructure (DB, external services, video processing)
 ```
-
----
 
 ## 🧱 Ключевые архитектурные решения
 
@@ -58,7 +53,6 @@ Infrastructure (DB, external services, video processing)
 * переключать поведение без изменения бизнес-логики
 * изолировать ML/AI-интеграции
 
----
 
 ### 🔹 Repository pattern
 
@@ -66,7 +60,7 @@ Infrastructure (DB, external services, video processing)
 * Изоляция бизнес-логики от БД
 * Упрощение тестирования
 
----
+
 
 ### 🔹 Unit of Work
 
@@ -74,7 +68,7 @@ Infrastructure (DB, external services, video processing)
 * Гарантия атомарности операций
 * Консистентность данных при обработке задач
 
----
+
 
 ### 🔹 Dependency Injection
 
@@ -82,7 +76,6 @@ Infrastructure (DB, external services, video processing)
 * Явное управление зависимостями
 * Удобство тестирования
 
----
 
 ## ⚙️ Асинхронная обработка
 
@@ -91,7 +84,6 @@ Infrastructure (DB, external services, video processing)
 * BackgroundTasks для выполнения долгих операций
 * I/O-bound операции (БД, HTTP-запросы, файловая система)
 
----
 
 ## 🎬 Обработка видео
 
@@ -104,7 +96,6 @@ Infrastructure (DB, external services, video processing)
 
 * время обработки сокращено: **80 → 20 секунд (x4)** за счёт распараллеливания
 
----
 
 ## 🔌 Интеграция с ML
 
@@ -113,7 +104,6 @@ Infrastructure (DB, external services, video processing)
 * Обработка ошибок и retry логика
 * Асинхронные вызовы
 
----
 
 ## 🧰 Технологии
 
@@ -127,7 +117,6 @@ Infrastructure (DB, external services, video processing)
 * OpenCV
 * python-chess
 
----
 
 ## 🧪 Тестирование
 
@@ -135,7 +124,6 @@ Infrastructure (DB, external services, video processing)
 * Проверка бизнес-логики и API
 * Частичное использование TDD
 
----
 
 ## 🐳 Запуск проекта
 
@@ -145,7 +133,6 @@ cd backend
 docker-compose up --build
 ```
 
----
 
 ## 📊 Производительность
 
@@ -153,7 +140,6 @@ docker-compose up --build
 * Асинхронная обработка задач
 * Оптимизированы I/O операции
 
----
 
 ## 👨‍💻 Моя роль
 
@@ -166,12 +152,10 @@ docker-compose up --build
 * Написание тестов (pytest)
 * Участие в code review и командной разработке
 
----
 
 ## 📎 Примечание
 
 Проект учебный, но реализован с использованием production-подходов:
 слоистая архитектура, паттерны проектирования, асинхронность, тестируемость, контейнеризация.
 
----
 
